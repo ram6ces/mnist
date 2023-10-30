@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Number Recognition with ONNX Model</title>
+    <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
+</head>
+<body>
+    <style>
+        #canvas {
+            background-color: black;
+        }
+    </style>
+    <h1>Calculator with Number Recognition</h1>
+    <canvas id="canvas" width="280" height="280" style="border:1px solid #ffff;"></canvas>
+    <button onclick="recognizeNumber()">Recognize</button>
+    <button onclick="clearCanvas()">Clear Canvas</button>
+    <div>
+        <input id="result" type="text" readonly>
+    </div>
+    <div>
+        <img id="image" src="#" alt="Recognized Image" style="display: none;">
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        function draw(event) {
+            if (isDrawing) {
+                ctx.beginPath();
+                ctx.fillStyle = 'white';
+                ctx.arc(event.offsetX, event.offsetY, 10, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        function preprocessCanvas() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const { data, width, height } = imageData;
+            const inputData = new Float32Array(28 * 28);
+
+            const smallCanvas = document.createElement('canvas');
+            const smallCtx = smallCanvas.getContext('2d');
+            smallCanvas.width = 28;
+            smallCanvas.height = 28;
+            smallCtx.fillStyle = 'black';
+            smallCtx.fillRect(0, 0, smallCanvas.width, smallCanvas.height);
+            smallCtx.drawImage(canvas, 0, 0, 28, 28);
+
+            const smallImageData = smallCtx.getImageData(0, 0, 28, 28).data;
+
+            // Update the image element with the current canvas data
+            const imgData = smallCanvas.toDataURL();
+            const imgElement = document.getElementById('image');
+            imgElement.src = imgData;
+            imgElement.style.display = 'block';
+
+            // Clear the canvas before extracting the image data
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            
+            for (let i = 0; i < 28; i++) {
+                for (let j = 0; j < 28; j++) {
+                    let grayscaleValue = smallImageData[4 * (i * 28 + j)] / 255;
+                    inputData[i * 28 + j] = (grayscaleValue - 0.1307/0.3081);
+                }
+            }
+
+            // Flattening 
+            for (let y = 0; y < 28; y++) {
+                for (let x = 0; x < 28; x++) {
+                    let originalIndex = y * 28 + x;
+                    let transposedIndex = x * 28 + y;  // Here's where the transpose happens
+                    inputData[transposedIndex] = inputData[originalIndex];
+                }
+            }
+            
+            return new onnx.Tensor(inputData, 'float32', [1, 1, 28, 28]);
+        }
+
+        function recognizeNumber() {
+            const session = new onnx.InferenceSession();
+            const url = 'mnist.onnx'; // replace with your model URL
+            session.loadModel(url).then(() => {
+                const input = preprocessCanvas();
+                console.log(input)
+                session.run([input]).then((output) => {
+                    const prediction = output.values().next().value.data;
+                    console.log(prediction)
+                    const maxPrediction = Math.max(...prediction);
+                    const predictedNumber = prediction.indexOf(maxPrediction);
+                    document.getElementById('result').value = predictedNumber;
+                }).catch((err) => {
+                    console.error('Error during inference:', err);
+                });
+            }).catch((err) => {
+                console.error('Error loading the model:', err);
+            });
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('result').value = '';
+            const imgElement = document.getElementById('image');
+            imgElement.style.display = 'none';
+        }
+
+        canvas.addEventListener('mousedown', (event) => {
+            isDrawing = true;
+            draw(event);
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            draw(event);
+        });
+    </script>
+</body>
+</html>
