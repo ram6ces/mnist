@@ -1,23 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Number Recognition with ONNX Model</title>
+    <title>MNIST</title>
     <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
 </head>
 <body>
+    
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
         #canvas {
             background-color: black;
         }
+        #recognized-image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+
+        div {
+            margin-top: 20px;
+        }
     </style>
-    <h1>Calculator with Number Recognition</h1>
-    <canvas id="canvas" width="280" height="280" style="border:1px solid #ffff;"></canvas>
-    <button onclick="recognizeNumber()">Recognize</button>
-    <button onclick="clearCanvas()">Clear Canvas</button>
+    <h1>Number Recognition with MNIST Model:</h1>
+    <canvas id="canvas" width="280" height="280" style="border: 10px solid #ffff;"></canvas>
+    <div>
+        <button onclick="recognizeNumber()">Recognize</button>
+        <button onclick="clearCanvas()">Clear Canvas</button>
+    </div>
+
     <div>
         <input id="result" type="text" readonly>
     </div>
     <div>
+        <h3>Recognized image :</h3>
         <img id="image" src="#" alt="Recognized Image" style="display: none;">
     </div>
 
@@ -62,7 +89,7 @@
             
             for (let i = 0; i < 28; i++) {
                 for (let j = 0; j < 28; j++) {
-                    let grayscaleValue = smallImageData[4 * (i * 28 + j)] / 255;
+                    let grayscaleValue = smallImageData[4 * (i * 28 + j)]/ 255;
                     inputData[i * 28 + j] = ((grayscaleValue - 0.1307)/0.3081);
                 }
             }
@@ -73,7 +100,7 @@
 
         function recognizeNumber() {
             const session = new onnx.InferenceSession();
-            const url = 'mnist.onnx'; // replace with your model URL
+            const url = 'mnist.onnx';
             session.loadModel(url).then(() => {
                 const input = preprocessCanvas();
                 console.log(input)

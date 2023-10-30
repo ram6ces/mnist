@@ -2,4 +2,4 @@ datasets/*
 photo/*
 
 mnist.pt 
-mnist.pth 
+mnist.pth
