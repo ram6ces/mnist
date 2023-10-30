@@ -63,18 +63,10 @@
             for (let i = 0; i < 28; i++) {
                 for (let j = 0; j < 28; j++) {
                     let grayscaleValue = smallImageData[4 * (i * 28 + j)] / 255;
-                    inputData[i * 28 + j] = (grayscaleValue - 0.1307/0.3081);
+                    inputData[i * 28 + j] = ((grayscaleValue - 0.1307)/0.3081);
                 }
             }
 
-            // Flattening 
-            for (let y = 0; y < 28; y++) {
-                for (let x = 0; x < 28; x++) {
-                    let originalIndex = y * 28 + x;
-                    let transposedIndex = x * 28 + y;  // Here's where the transpose happens
-                    inputData[transposedIndex] = inputData[originalIndex];
-                }
-            }
             
             return new onnx.Tensor(inputData, 'float32', [1, 1, 28, 28]);
         }
