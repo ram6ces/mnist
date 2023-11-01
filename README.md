@@ -1,4 +1,4 @@
-[# Number Recognition with NMIST Model](https://ram6ces.github.io/mnist/)
+# Number Recognition with NMIST Model
 
 This project is a web application that allows users to draw numbers and test the NMIST model for number recognition. The NMIST model is a machine learning model that has been trained on a dataset of handwritten digits and can recognize digits with high accuracy.
 
