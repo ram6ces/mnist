@@ -2,6 +2,8 @@
 
 This project is a web application that allows users to draw numbers and test the NMIST model for number recognition. The NMIST model is a machine learning model that has been trained on a dataset of handwritten digits and can recognize digits with high accuracy.
 
+You can access the web application at https://ram6ces.github.io/mnist/.
+
 ## Getting Started
 
 To get started with this project, you will need to have the following installed on your machine:
